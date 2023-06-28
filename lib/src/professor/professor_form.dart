@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gerenciador_turma/src/aluno/aluno_page.dart';
-import 'package:gerenciador_turma/src/aluno/entity_aluno.dart';
-
-import 'package:gerenciador_turma/src/database/database_helper_aluno.dart';
+import 'package:gerenciador_turma/src/database/database_helper_professor.dart';
 import 'package:gerenciador_turma/src/professor/entity_professor.dart';
 import 'package:gerenciador_turma/src/professor/professor_page.dart';
 
@@ -10,17 +7,20 @@ class ProfessorForm extends StatelessWidget {
   final GlobalKey<FormState> _key = GlobalKey();
   final bool _validate = false;
   late String nome;
-  final dbHelper = DatabaseHelperAluno.instance;
+  final dbHelper = DatabaseHelperProfessor.instance;
   Professor? professor;
 
   ProfessorForm({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (ModalRoute.of(context)!.settings.arguments != null) {
+      professor = ModalRoute.of(context)!.settings.arguments as Professor;
+    }
     //var _back = LoginBack(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastro de Aluno'),
+        title: const Text('Formulário de Professor'),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -38,15 +38,14 @@ class ProfessorForm extends StatelessWidget {
 
   //Widget _formUI(BuildContext context, LoginBack _back) {
   Widget _formUI(BuildContext context) {
-    var loginController = TextEditingController();
-    var loginController2 = TextEditingController();
+    var nomeController = TextEditingController();
 
     if (ModalRoute.of(context)!.settings.arguments != null) {
       professor = ModalRoute.of(context)!.settings.arguments as Professor;
     }
 
     if (professor == null) {
-      print('aluno nulo');
+      print('prof nulo');
     } else {
       //_loginController.text = _back.usuario.email!;
       // _loginController2.text = _back.usuario.password!;
@@ -58,14 +57,13 @@ class ProfessorForm extends StatelessWidget {
           height: 100,
         ),
         TextFormField(
-          controller: loginController,
+          //controller: nomeController,
           decoration: const InputDecoration(hintText: 'Nome'),
           maxLength: 100,
-          //validator: _validarEmail,
           onSaved: (String? val) {
             nome = val!;
-            //(newValue) => _back.contato.nome = newValue;
           },
+          initialValue: professor?.nome_prof,
         ),
         const SizedBox(
           height: 15,
@@ -87,8 +85,7 @@ class ProfessorForm extends StatelessWidget {
         ),
         ElevatedButton(
             onPressed: () {
-              loginController.clear();
-              loginController2.clear();
+              nomeController.clear();
             },
             child: const Text('Limpar'))
       ],

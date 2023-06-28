@@ -6,13 +6,19 @@ import 'package:gerenciador_turma/src/shared/app_scaffold.dart';
 class AlunoPage extends StatelessWidget {
   AlunoPage({Key? key}) : super(key: key);
   final dBHelper = DatabaseHelperAluno.instance;
-
+  late Aluno alunoSel;
   Future<List<Aluno>> criaLista() async {
     return await dBHelper.buscar();
   }
 
   void _editarAluno(BuildContext context, Aluno aluno) {
     Navigator.of(context).pushNamed('/aluno_form', arguments: aluno);
+  }
+
+  void _excluirAluno(BuildContext context, dynamic id) async {
+    await dBHelper.excluir(id);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => AlunoPage()));
   }
 
   @override
@@ -53,12 +59,18 @@ class AlunoPage extends StatelessWidget {
                       IconButton(
                         onPressed: () {
                           _editarAluno(context, aluno);
+                          print(
+                              'Código do aluno Selecionado: ${aluno.cod_aluno}');
+                          print('Aluno Selecionado: ${aluno.nome_aluno}');
+                          print('Curso do aluno Selecionado: ${aluno.curso}');
                         },
                         icon: Icon(Icons.edit),
                         color: Colors.orange,
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _excluirAluno(context, aluno.cod_aluno);
+                        },
                         icon: Icon(Icons.delete),
                         color: Colors.red,
                       ),

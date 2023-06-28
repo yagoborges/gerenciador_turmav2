@@ -38,13 +38,13 @@ class MyApp extends StatelessWidget {
       ),*/
       initialRoute: '/login_page',
       routes: {
-        '/professor_page': (context) => const ProfessorPage(),
-        '/disciplina_page': (context) => const DisciplinaPage(),
+        '/professor_page': (context) => ProfessorPage(),
+        '/disciplina_page': (context) => DisciplinaPage(),
         '/turma_page': (context) => const TurmaPage(),
         '/aluno_page': (context) => AlunoPage(),
         '/login_page': (context) => Login(),
         '/aluno_form': (context) => AlunoForm(),
-        '/disciplina_form': (context) => const DisciplinaForm(),
+        '/disciplina_form': (context) => DisciplinaForm(),
         '/professor_form': (context) => ProfessorForm(),
         '/turma_form': (context) => const TurmaForm(),
       },

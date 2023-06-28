@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:gerenciador_turma/src/aluno/entity_aluno.dart';
 import 'package:gerenciador_turma/src/professor/entity_professor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -14,7 +13,7 @@ class DatabaseHelperProfessor {
     return prefs.getString('token');
   }
 
-  var uriREST = Uri.parse('http://192.168.0.139:8080/alunos');
+  var uriREST = Uri.parse('http://192.168.0.139:8080/professores');
 
   //grava os dados no banco
   salvar(Professor professor) async {
@@ -28,12 +27,12 @@ class DatabaseHelperProfessor {
 
     var statusCode = 0;
     http.Response resposta;
-    //comparação com id de aluno
+    //comparação com id de professor
     if (professor.cod_prof == null) {
-      print('Código do aluno Nulo');
-      //fazer as alterações para os campos de alunos
+      print('Código do professor Nulo');
+      //fazer as alterações para os campos de professores
       var professorJson = jsonEncode({'nome_prof': professor.nome_prof});
-      print('JSON ALUNO: $professorJson');
+      print('JSON PROFESSOR: $professorJson');
       resposta =
           await http.post(uriREST, headers: headers, body: professorJson);
     } else {
@@ -45,12 +44,12 @@ class DatabaseHelperProfessor {
     if (statusCode != 200) throw Exception('Erro de REST API.');
   }
 
-  //lista todos os alunos do banco
+  //lista todos os professores do banco
   Future<List<Professor>> buscar() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
 
-    var uriREST2 = Uri.parse('http://192.168.0.139:8080/alunos');
+    var uriREST2 = Uri.parse('http://192.168.0.139:8080/professores');
     var header = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'
@@ -65,9 +64,9 @@ class DatabaseHelperProfessor {
     var listaProfessores = <Professor>[];
 
     for (Map<String, dynamic> item in listaDart) {
-      //pegar o item, converte para Aluno
+      //pegar o item, converte para Professor
       var professor =
-          Professor(cod_prof: item['cod_prof'], nome_prof: item[nome_prof]);
+          Professor(cod_prof: item['cod_prof'], nome_prof: item['nome_prof']);
 
       listaProfessores.add(professor);
     }
@@ -82,7 +81,7 @@ class DatabaseHelperProfessor {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
 
-    var uriREST3 = Uri.parse('http://192.168.0.139:8080/alunos/$id');
+    var uriREST3 = Uri.parse('http://192.168.0.139:8080/professores/$id');
     var header = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'

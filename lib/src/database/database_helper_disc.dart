@@ -1,22 +1,24 @@
 import 'dart:convert';
-import 'package:gerenciador_turma/src/aluno/entity_aluno.dart';
+
+import 'package:gerenciador_turma/src/disciplina/entity_disciplina.dart';
+import 'package:gerenciador_turma/src/professor/entity_professor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class DatabaseHelperAluno {
-  DatabaseHelperAluno._privateConstructor();
-  static final DatabaseHelperAluno instance =
-      DatabaseHelperAluno._privateConstructor();
+class DatabaseHelperDisc {
+  DatabaseHelperDisc._privateConstructor();
+  static final DatabaseHelperDisc instance =
+      DatabaseHelperDisc._privateConstructor();
   //despois recupera
   Future<String?> getToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  var uriREST = Uri.parse('http://192.168.0.139:8080/alunos');
+  var uriREST = Uri.parse('http://192.168.0.139:8080/disciplinas');
 
   //grava os dados no banco
-  salvar(Aluno aluno) async {
+  salvar(Disciplina disciplina, Professor professor) async {
     var testeToken = await getToken();
     print('O toke resgatado pelo SharedPreferences é: $testeToken');
     var headers = {
@@ -28,31 +30,45 @@ class DatabaseHelperAluno {
     var statusCode = 0;
     http.Response resposta;
     //comparação com id de aluno
-    if (aluno.cod_aluno == null) {
+    if (disciplina.nome_disc == null) {
       print('Código do aluno Nulo');
       //fazer as alterações para os campos de alunos
-      var alunoJson =
-          jsonEncode({'nome_aluno': aluno.nome_aluno, 'curso': aluno.curso});
-      print('JSON ALUNO: $alunoJson');
-      resposta = await http.post(uriREST, headers: headers, body: alunoJson);
+
+      //Criando um Map para converter em JSON
+      Map<String, dynamic> mapJson = {
+        'nome_disc': disciplina.nome_disc,
+        'fk_cod_prof': {
+          'cod_prof': professor.cod_prof,
+        },
+      };
+
+      var disciplinaJson = jsonEncode(mapJson);
+      print('JSON DISC: $disciplinaJson');
+      resposta =
+          await http.post(uriREST, headers: headers, body: disciplinaJson);
     } else {
-      var alunoJson = jsonEncode({
-        'matricula': aluno.cod_aluno,
-        'nome_aluno': aluno.nome_aluno,
-        'curso': aluno.curso
-      });
-      resposta = await http.put(uriREST, headers: headers, body: alunoJson);
+      //Criando um Map para converter em JSON
+      Map<String, dynamic> mapJson = {
+        'cod_disc': disciplina.cod_disc,
+        'nome_disc': disciplina.nome_disc,
+        'fk_cod_prof': {
+          'cod_prof': professor.cod_prof,
+        },
+      };
+      var disciplinaJson = jsonEncode(mapJson);
+      resposta =
+          await http.put(uriREST, headers: headers, body: disciplinaJson);
     }
     statusCode = resposta.statusCode;
     if (statusCode != 200) throw Exception('Erro de REST API.');
   }
 
   //lista todos os alunos do banco
-  Future<List<Aluno>> buscar() async {
+  Future<List<Disciplina>> buscar() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
 
-    var uriREST2 = Uri.parse('http://192.168.0.139:8080/alunos');
+    var uriREST2 = Uri.parse('http://192.168.0.139:8080/disciplinas');
     var header = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'
@@ -70,22 +86,22 @@ class DatabaseHelperAluno {
     var responseBodyString = utf8.decode(responseBodyBytes);
 
     Iterable listaDart = jsonDecode(responseBodyString);
-    var listaAlunos = <Aluno>[];
+    var listaDisciplinas = <Disciplina>[];
     //print(listaDart.toString());
     for (Map<String, dynamic> item in listaDart) {
       //pegar o item, converte para Aluno
-      var aluno = Aluno(
-          cod_aluno: item['matricula'],
-          nome_aluno: item['nome_aluno'],
-          curso: item['curso']);
+      var disciplina = Disciplina(
+          cod_disc: item['cod_disc'],
+          nome_disc: item['nome_disc'],
+          fk_cod_prof: item['fk_cod_prof']);
 
-      listaAlunos.add(aluno);
+      listaDisciplinas.add(disciplina);
     }
-    for (var c in listaAlunos) {
-      print(c.nome_aluno);
-      print('Curso: ${c.curso}');
+    for (var c in listaDisciplinas) {
+      print(c.nome_disc);
+      print('Chave estrangeira cod_prof: ${c.fk_cod_prof}');
     }
-    return listaAlunos;
+    return listaDisciplinas;
   }
 
   //exclui um registro no banco com base no id
@@ -93,7 +109,7 @@ class DatabaseHelperAluno {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
 
-    var uriREST3 = Uri.parse('http://192.168.0.139:8080/alunos/$id');
+    var uriREST3 = Uri.parse('http://192.168.0.139:8080/disciplinas/$id');
     var header = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'
